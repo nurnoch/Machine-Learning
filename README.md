@@ -5,3 +5,4 @@ Machine learning algorithms impletation and applications.
 1. kNN
 2. Decision Tree
 3. K-means
+4. Naive Bayes
