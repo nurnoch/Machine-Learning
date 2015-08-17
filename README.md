@@ -7,3 +7,4 @@ Machine learning algorithms impletation and applications.
 3. K-means
 4. Naive Bayes
 5. Logistic Regression
+6. PCA
