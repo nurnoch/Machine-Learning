@@ -8,3 +8,4 @@ Machine learning algorithms impletation and applications.
 4. Naive Bayes
 5. Logistic Regression
 6. PCA
+7. SVD
