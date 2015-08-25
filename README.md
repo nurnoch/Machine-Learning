@@ -9,3 +9,5 @@ Machine learning algorithms impletation and applications.
 5. Logistic Regression
 6. PCA
 7. SVD
+8. AdaBoost
+9. Random Forest
