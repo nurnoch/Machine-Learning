@@ -104,7 +104,7 @@ def loadDataSet(fileName):
 
 # ROC曲线的绘制及AUC计算
 def plotROC(predStrengths, classLabels):
-	cur = (1.0, 1.0)
+	cur = (1.0, 1.0) # 绘制光标的位置S
 	ySum = 0.0
 	numPosClas = sum(array(classLabels) == 1.0) # 正例个数
 	yStep = 1 / float(numPosClas)
@@ -135,7 +135,7 @@ def plotROC(predStrengths, classLabels):
 	plt.show()
 	print "The Area Under the Curve is: ", ySum * xStep
 
-	
+
 
 
 
