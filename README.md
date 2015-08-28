@@ -11,3 +11,4 @@ Machine learning algorithms impletation and applications.
 7. SVD
 8. AdaBoost
 9. Random Forest
+10. Linear Regression
