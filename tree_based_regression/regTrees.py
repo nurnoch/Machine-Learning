@@ -66,11 +66,100 @@ def chooseBestSplit(dataSet, leafType=regLeaf, errType=regErr, ops=(1,4)):
 		return None, leafType(dataSet)
 	return bestIndex,bestValue
 
+# 当前的节点是否为叶节点
+def isTree(obj):
+	return (type(obj).__name__ == 'dict')
+
+def getMean(tree):
+	if isTree(tree['right']):
+		tree['right'] = getMean(tree['right'])
+	if isTree(tree['left']):
+		tree['left'] = getMean(tree['left'])
+	return (tree['left'] + tree['right']) / 2.0
+
+def prune(tree, testData):
+	if shape(testData)[0] == 0: # 测试集为空
+		return getMean(tree)
+	if isTree(tree['right']) or isTree(tree['left']):
+		lSet, rSet = binSplitDataSet(testData, tree['spInd'], tree['spVal'])
+
+	if isTree(tree['left']):
+		tree['left'] = prune(tree['left'], lSet)
+	if isTree(tree['right']):
+		tree['right'] = prune(tree['right'], rSet)
+
+	# 都是叶节点，是否可以进行merge
+	if not isTree(tree['left']) and not isTree(tree['right']):
+		lSet, rSet = binSplitDataSet(testData, tree['spInd'], tree['spVal'])
+		erorrNoMerge = sum(power(lSet[:, -1] - tree['left'], 2)) + sum(power(rSet[:, -1] - tree['right'], 2))
+		treeMean = (tree['left'] + tree['right']) / 2.0
+		errorMerge = sum(power(testData[:, -1] - treeMean, 2))
+		if errorMerge < erorrNoMerge:
+			print "merging"
+			return treeMean
+		else:
+			return tree
+	else:
+		return tree
+
+#  将数据集格式化为目标变量Y和自变量x
+def linearSolve(dataSet):
+ 	m, n = shape(dataSet)
+ 	X = mat(ones((m, n)))
+ 	Y = mat(ones((m, 1)))
+ 	X[:, 1:n] = dataSet[:, 0:n-1]
+ 	Y = dataSet[:, -1]
+ 	xTx = X.T * X
+ 	if linalg.det(xTx) == 0.0:
+ 		raise NameError('This matrix is singular, cannot do inverse.')
+ 	ws = xTx.I * (X.T * Y)
+ 	return ws, X, Y
+
+# 当需要再切分的时候，负责生成叶节点
+def modelLeaf(dataSet):
+	ws, X, Y = linearSolve(dataSet)
+	return ws
+
+# 计算给定数据集上的误差
+def modelErr(dataSet):
+	ws, X, Y = linearSolve(dataSet)
+	yHat = X * ws
+	return sum(power(Y - yHat, 2))
 
 
+#### 树回归与标准回归的比较
 
+# 回归树
+def regTreeEval(model, inDat):
+	return float(model)
 
+# 模型树
+def modelTreeEval(model, inDat):
+	n = shape(inDat)[1]
+	X = mat(ones((1, n+1))) 
+	X[:, 1:n+1] = inDat
+	return float(X * model)
 
+def treeForeCast(tree, inData, modelEval=regTreeEval):
+	if not isTree(tree):
+		return modelEval(tree, inData)
+	if inData[tree['spInd']] > tree['spVal']:
+		if isTree(tree['left']):
+			return treeForeCast(tree['left'], inData, modelEval)
+		else:
+			return modelEval(tree['left'], inData)
+	else:
+		if isTree(tree['right']):
+			return treeForeCast(tree['right'], inData, modelEval)
+		else:
+			return modelEval(tree['right'], inData)
+
+def createForeCast(tree, testData, modelEval=regTreeEval):
+	m = len(testData)
+	yHat = mat(zeros((m, 1)))
+	for i in range(m):
+		yHat[i,0] = treeForeCast(tree, mat(testData[i]), modelEval)
+	return yHat
 
 
 
